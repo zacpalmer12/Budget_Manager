@@ -1,5 +1,6 @@
 package budget;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -17,6 +18,7 @@ public class Main {
         List<String> other = new ArrayList<>();
         List<String> all = new ArrayList<>();
 
+
         outerLoop:
         while (true) {
             System.out.println("""
@@ -25,6 +27,8 @@ public class Main {
                     2) Add purchase
                     3) Show list of purchases
                     4) Balance
+                    5) Save
+                    6) Load
                     0) Exit
                     """);
 
@@ -204,6 +208,79 @@ public class Main {
                     double spent = foodTotal + clothesTotal + entertainmentTotal + otherTotal;
                     System.out.println("Balance: $" + String.format("%.2f", balance - spent));
                     System.out.println();
+                    break;
+
+                case "5":
+                    try (PrintWriter writer = new PrintWriter(new FileWriter("purchases.txt"))) {
+                        writer.println(balance); // save balance first
+                        for (String item : all) {
+                            String category = "";
+                            if (food.contains(item)) category = "Food";
+                            else if (clothes.contains(item)) category = "Clothes";
+                            else if (entertainment.contains(item)) category = "Entertainment";
+                            else if (other.contains(item)) category = "Other";
+                            writer.println(category + ";" + item);
+                        }
+                        System.out.println("Purchases were saved!");
+                        System.out.println();
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+                    break;
+
+
+                case "6":
+                    try (BufferedReader reader = new BufferedReader(new FileReader("purchases.txt"))) {
+                        all.clear();
+                        food.clear();
+                        clothes.clear();
+                        entertainment.clear();
+                        other.clear();
+                        foodTotal = clothesTotal = entertainmentTotal = otherTotal = 0;
+
+                        String line = reader.readLine();
+                        if (line != null) {
+                            balance = Double.parseDouble(line); // restore balance
+                        }
+
+                        while ((line = reader.readLine()) != null) {
+                            String[] parts = line.split(";", 2); // category ; item
+                            if (parts.length == 2) {
+                                String category = parts[0];
+                                String item = parts[1];
+
+                                all.add(item);
+
+                                double price = Double.parseDouble(item.substring(item.lastIndexOf('$') + 1));
+
+                                switch (category) {
+                                    case "Food":
+                                        food.add(item);
+                                        foodTotal += price;
+                                        break;
+                                    case "Clothes":
+                                        clothes.add(item);
+                                        clothesTotal += price;
+                                        break;
+                                    case "Entertainment":
+                                        entertainment.add(item);
+                                        entertainmentTotal += price;
+                                        break;
+                                    case "Other":
+                                        other.add(item);
+                                        otherTotal += price;
+                                        break;
+                                }
+                            }
+                        }
+
+                        System.out.println("Purchases were loaded!");
+                        System.out.println();
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
                     break;
 
                 case "0":
