@@ -29,6 +29,7 @@ public class Main {
                     4) Balance
                     5) Save
                     6) Load
+                    7) Analyse (Sort)
                     0) Exit
                     """);
 
@@ -282,6 +283,107 @@ public class Main {
                         e.printStackTrace();
                     }
                     break;
+
+                case "7":
+                    sortLoop:
+                    while (true) {
+                        System.out.println("""
+                How do you want to sort?
+                1) Sort all purchases
+                2) Sort by type
+                3) Sort certain type
+                4) Back
+                """);
+
+                        String sortType = sc.next();
+                        sc.nextLine(); // clear newline
+
+                        switch (sortType) {
+                            case "1":
+                                if (all.isEmpty()) {
+                                    System.out.println("The purchase list is empty!\n");
+                                } else {
+                                    System.out.println("All:");
+                                    all.stream()
+                                            .sorted((a, b) -> {
+                                                double priceA = Double.parseDouble(a.substring(a.lastIndexOf('$') + 1));
+                                                double priceB = Double.parseDouble(b.substring(b.lastIndexOf('$') + 1));
+                                                return Double.compare(priceB, priceA); // descending
+                                            })
+                                            .forEach(System.out::println);
+                                    double total = foodTotal + clothesTotal + entertainmentTotal + otherTotal;
+                                    System.out.println("Total sum: $" + String.format("%.2f", total));
+                                    System.out.println();
+                                }
+                                break;
+
+                            case "2":
+                                List<String> types = new ArrayList<>();
+                                types.add("Food $" + String.format("%.2f", foodTotal));
+                                types.add("Clothes $" + String.format("%.2f", clothesTotal));
+                                types.add("Entertainment $" + String.format("%.2f", entertainmentTotal));
+                                types.add("Other $" + String.format("%.2f", otherTotal));
+
+                                types.stream()
+                                        .sorted((a, b) -> {
+                                            double priceA = Double.parseDouble(a.substring(a.lastIndexOf('$') + 1));
+                                            double priceB = Double.parseDouble(b.substring(b.lastIndexOf('$') + 1));
+                                            return Double.compare(priceB, priceA);
+                                        })
+                                        .forEach(System.out::println);
+
+                                double grandTotal = foodTotal + clothesTotal + entertainmentTotal + otherTotal;
+                                System.out.println("Total sum: $" + String.format("%.2f", grandTotal));
+                                System.out.println();
+                                break;
+
+                            case "3":
+                                System.out.println("""
+                        Choose the type of purchase
+                        1) Food
+                        2) Clothes
+                        3) Entertainment
+                        4) Other
+                        """);
+
+                                String catChoice = sc.next();
+                                List<String> targetList = switch (catChoice) {
+                                    case "1" -> food;
+                                    case "2" -> clothes;
+                                    case "3" -> entertainment;
+                                    case "4" -> other;
+                                    default -> null;
+                                };
+
+                                double targetTotal = switch (catChoice) {
+                                    case "1" -> foodTotal;
+                                    case "2" -> clothesTotal;
+                                    case "3" -> entertainmentTotal;
+                                    case "4" -> otherTotal;
+                                    default -> 0;
+                                };
+
+                                if (targetList == null || targetList.isEmpty()) {
+                                    System.out.println("The purchase list is empty!\n");
+                                } else {
+                                    targetList.stream()
+                                            .sorted((a, b) -> {
+                                                double priceA = Double.parseDouble(a.substring(a.lastIndexOf('$') + 1));
+                                                double priceB = Double.parseDouble(b.substring(b.lastIndexOf('$') + 1));
+                                                return Double.compare(priceB, priceA);
+                                            })
+                                            .forEach(System.out::println);
+                                    System.out.println("Total sum: $" + String.format("%.2f", targetTotal));
+                                    System.out.println();
+                                }
+                                break;
+
+                            case "4":
+                                break sortLoop;
+                        }
+                    }
+                    break;
+
 
                 case "0":
                     System.out.println("Bye!");
